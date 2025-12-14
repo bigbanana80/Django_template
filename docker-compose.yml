@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=django
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U django -d postgres"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin_container
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - db
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=ahgahp3omah5xoo5Yideixiebuphoo
+      - DATABASE_URL=postgres://django:django@db:5432/postgres
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=django
+    depends_on:
+      - db
+      # db:
+        # condition: service_healthy
+
+volumes:
+  postgres_data:
